@@ -2,4 +2,4 @@
 
 #include "types.h"
 
-size_t calculateCombo(tCell *table);
+size_t calculateCombo(tCell *table, const tFilterFunc *filter);

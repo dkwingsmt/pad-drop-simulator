@@ -55,8 +55,7 @@ size_t findAncester(tCell *library, size_t idx) {
 	return parent;
 }
 
-size_t countHollowGroups(const tCell *table) {
-	tCell library[TABLE_CELL_NUM_MEM];
+size_t countHollowGroups(const tCell *table, tCell *library) {
 	size_t idx = 0;
 	for (size_t iRow = 0; iRow < TABLE_HEIGHT; iRow++) {
 		for (size_t iCol = 0; iCol < TABLE_WIDTH; iCol++, idx++) {
@@ -96,15 +95,16 @@ size_t countHollowGroups(const tCell *table) {
 	for (size_t iRow = 0; iRow < TABLE_HEIGHT; iRow++) {
 		for (size_t iCol = 0; iCol < TABLE_WIDTH; iCol++) {
 			size_t ancester = findAncester(library, idx);
-			if (ancester != CELL_EMPTY) {
-				library[ancester] = CELL_EMPTY;
+			if (ancester == idx) {
 				count++;
 			}
+			library[idx] = ancester;
 
 			idx++;
 		}
 		idx += TABLE_WIDTH_MEM - TABLE_WIDTH;
 	}
+
 	return count;
 }
 
@@ -113,7 +113,7 @@ void simulateDrop(tCell *table) {
 	tCell *tgt = src;
 	for (size_t iCol = 0; iCol < TABLE_WIDTH; iCol++) {
 		for (size_t iRow = 0; iRow < TABLE_HEIGHT; iRow++) {
-			while (*src & CELL_MASK_HOLLOW_AND_EMPTY && src >= table) {
+			while (src >= table && *src & CELL_MASK_HOLLOW_AND_EMPTY) {
 				src -= TABLE_WIDTH_MEM;
 			}
 			if (src < table) {
@@ -131,18 +131,53 @@ void simulateDrop(tCell *table) {
 	}
 }
 
-size_t calculateCombo(tCell *table) {
+bool libraryHas8(const tCell *library) {
+	size_t colorPoss[TABLE_CELL_NUM_MEM];
+
+	size_t idx = 0;
+	for (size_t i = 0; i < TABLE_CELL_NUM_MEM; i++) {
+		colorPoss[i] = 0;
+	}
+	for (size_t iRow = 0; iRow < TABLE_HEIGHT; iRow++) {
+		for (size_t iCol = 0; iCol < TABLE_WIDTH; iCol++) {
+			if (library[idx] != CELL_EMPTY) {
+				colorPoss[library[idx]]++;
+			}
+
+			idx++;
+		}
+		idx += TABLE_WIDTH_MEM - TABLE_WIDTH;
+	}
+
+	for (size_t i = 0; i < TABLE_CELL_NUM_MEM; i++) {
+		if (colorPoss[i] >= 8) {
+			return true;
+		}
+	}
+	return false;
+}
+
+size_t calculateCombo(tCell *table, const tFilterFunc *filter) {
 	size_t thisCount;
 	size_t count = 0;
 
+	bool has8 = false;
+
 	while(1) {
 		flagHollows(table);
-		thisCount = countHollowGroups(table);
+
+		tCell library[TABLE_CELL_NUM_MEM];
+		thisCount = countHollowGroups(table, library);
 		if (!thisCount) {
 			break;
 		}
+		has8 |= libraryHas8(library);
 		count += thisCount;
 		simulateDrop(table);
+	}
+
+	if (!has8) {
+		return 0;
 	}
 	return count;
 }

@@ -46,11 +46,11 @@ void findBestCombo(int oneColor) {
 	}
 
 	tCell table[TABLE_CELL_NUM_MEM];
-	size_t currentMaxCombo = 0;
+	size_t currentMaxCombo = 1;
 	size_t currentNum = 0;
 	do {
 		generateTable(colorPoss, oneColor, table);
-		size_t combo = calculateCombo(table);
+		size_t combo = calculateCombo(table, nullptr);
 		if (combo >= currentMaxCombo) {
 			if (combo > currentMaxCombo) {
 				currentNum = 1;

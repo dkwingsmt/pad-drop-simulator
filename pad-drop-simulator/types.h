@@ -49,3 +49,5 @@ template<bool transposed>
 constexpr size_t versTableWidth() {
 	return transposed ? TABLE_HEIGHT : TABLE_WIDTH;
 }
+
+typedef std::function<bool(const tCell*)> tFilterFunc;

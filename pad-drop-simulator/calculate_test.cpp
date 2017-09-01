@@ -6,7 +6,7 @@
 #include "calculate_test.h"
 
 void flagHollows(tCell *table);
-size_t countHollowGroups(const tCell *table);
+size_t countHollowGroups(const tCell *table, tCell *filter);
 void simulateDrop(tCell *table);
 
 void translateTable(const char *src, tCell *dst) {
@@ -90,6 +90,7 @@ void test_flagHollows() {
 
 void test_countHollowGroups() {
 	tCell table[TABLE_CELL_NUM_MEM];
+	tCell library[TABLE_CELL_NUM_MEM];
 
 	// All 0
 	translateTable(
@@ -100,7 +101,7 @@ void test_countHollowGroups() {
 		"000000", table
 	);
 	flagHollows(table);
-	assert(countHollowGroups(table) == 1);
+	assert(countHollowGroups(table, library) == 1);
 
 	// U shape and O shape
 	translateTable(
@@ -111,7 +112,7 @@ void test_countHollowGroups() {
 		"100000", table
 	);
 	flagHollows(table);
-	assert(countHollowGroups(table) == 1);
+	assert(countHollowGroups(table, library) == 1);
 
 	// Snake (late connection)
 	translateTable(
@@ -122,7 +123,7 @@ void test_countHollowGroups() {
 		"111111", table
 	);
 	flagHollows(table);
-	assert(countHollowGroups(table) == 2);
+	assert(countHollowGroups(table, library) == 2);
 
 	// Special (non-hollow connects separate hollows)
 	translateTable(
@@ -133,7 +134,7 @@ void test_countHollowGroups() {
 		"000000", table
 	);
 	flagHollows(table);
-	assert(countHollowGroups(table) == 3);
+	assert(countHollowGroups(table, library) == 3);
 }
 
 void test_simulateDrop() {
@@ -179,7 +180,7 @@ void test_calculateCombo() {
 		"000000"
 		"000000", table
 	);
-	assert(calculateCombo(table) == 1);
+	assert(calculateCombo(table, nullptr) == 1);
 
 	// 0 combo
 	translateTable(
@@ -189,7 +190,7 @@ void test_calculateCombo() {
 		"101010"
 		"010101", table
 	);
-	assert(calculateCombo(table) == 0);
+	assert(calculateCombo(table, nullptr) == 0);
 
 	translateTable(
 		"010100"
@@ -198,7 +199,7 @@ void test_calculateCombo() {
 		"110001"
 		"100100", table
 	);
-	assert(calculateCombo(table) == 9);
+	assert(calculateCombo(table, nullptr) == 9);
 }
 
 void runAllTests() {
